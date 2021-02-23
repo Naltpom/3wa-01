@@ -6,7 +6,6 @@ class Player {
         this._force = force;
         this._shot = 0;
         this._hit_logs = [];
-        this._dammage = 0;
     }
 
     stats () {
@@ -19,55 +18,57 @@ class Player {
         };
     }
 
+    get life () {
+        return this._life;
+    }
+
+    get name () {
+        return this._name;
+    }
+
     removeLife (dammage) {
         this._life = this._life - dammage;
     }
 
     hit (player) {
         // remove random life to other
-        this._dammage = Math.floor( Math.random() * this._force );
-        this._hit_logs.push(this._dammage);
-        player.removeLife(this._dammage)
+        let dammage = Math.ceil( Math.random() * this._force );
+        this._hit_logs.push(dammage);
+        player.removeLife(dammage);
+        this._shot ++;
+        return dammage;
     }
 }
 
 class Game {
-    constructor () {
-        this._player1 = new Dragon("dragon")
-        this._player2 = new Knight("master")
+    constructor (player1, player2) {
+        this._p1 = player1
+        this._p2 = player2
+
         this.run()
     }
 
     run () {
 
         // test turn 1
-        while (this._player1._life > 0 && this._player2._life > 0 ) {
+        while (this._p1.life > 0 && this._p2.life > 0 ) {
             
-            if(Math.random() > 0.5) {
-                // _player2 turn
-                this._player2.hit(this._player1)
-                console.log("_player2 turn and hit with "+ this._player2._dammage)
-    
-            } else {
-                // _player1 turn
-                this._player1.hit(this._player2)
-                console.log("_player1 turn and hit with "+ this._player1._dammage)
-    
-            }
+            const [assaillant, victim] = (Math.random() > 0.5) ? [this._p1, this._p2] : [this._p2, this._p1]
+
+            
+            console.log(`${assaillant.name} turn and hit with ${assaillant.hit(victim)}`)
         }
-        console.log(this._player1.stats());
-        console.log(this._player2.stats());
-        if (this._player1._life <= 0 ) { 
-            console.log( 'player 1 lost' ) 
-        } else {  
-            console.log( 'player 2 lost' ) 
-        };
+        console.log(this._p1.stats());
+        console.log(this._p2.stats());
+        (this._p1.life <= 0 ) ? console.log( `${this._p1.name} lost` ) : console.log( `${this._p2.name} lost` );
     }
 }
 
-class Dragon extends Player {constructor (name, life, force) {super(name, life, force)}}
+class Dragon extends Player {}
 
 class Knight extends Player {constructor (name, life, force) {super(name, life, force)}}
 
-game = new Game();
-console.log(game)
+
+const dragon = new Dragon("Smaug", 150, 10)
+const knight = new Knight("Master", 110, 12)
+new Game(dragon, knight); 
